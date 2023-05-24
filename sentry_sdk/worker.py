@@ -26,6 +26,7 @@ class BackgroundWorker(object):
         self._lock = threading.Lock()
         self._thread = None  # type: Optional[threading.Thread]
         self._thread_for_pid = None  # type: Optional[int]
+        self._times = []
 
     @property
     def is_alive(self):
@@ -120,6 +121,7 @@ class BackgroundWorker(object):
     def _target(self):
         # type: () -> None
         while True:
+            start = time()
             callback = self._queue.get()
             try:
                 if callback is _TERMINATOR:
@@ -130,4 +132,5 @@ class BackgroundWorker(object):
                     logger.error("Failed processing job", exc_info=True)
             finally:
                 self._queue.task_done()
+            self._times.append(time() - start)
             sleep(0)
