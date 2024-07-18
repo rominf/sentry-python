@@ -1043,7 +1043,7 @@ def event_from_exception(
 
 
 def _module_in_list(name, items):
-    # type: (str, Optional[List[str]]) -> bool
+    # type: (Optional[str], Optional[List[str]]) -> bool
     if name is None:
         return False
 
