@@ -170,6 +170,14 @@ def maybe_create_breadcrumbs_from_span(scope, span):
         )
 
 
+def _get_frame_module_abs_path(frame):
+    # type: (FrameType) -> str
+    try:
+        return frame.f_code.co_filename
+    except Exception:
+        return ""
+
+
 def add_query_source(span):
     # type: (sentry_sdk.tracing.Span) -> None
     """
@@ -200,10 +208,7 @@ def add_query_source(span):
     # Find the correct frame
     frame = sys._getframe()  # type: Union[FrameType, None]
     while frame is not None:
-        try:
-            abs_path = frame.f_code.co_filename
-        except Exception:
-            abs_path = ""
+        abs_path = _get_frame_module_abs_path(frame)
 
         try:
             namespace = frame.f_globals.get("__name__")  # type: Optional[str]
@@ -250,10 +255,7 @@ def add_query_source(span):
         if namespace is not None:
             span.set_data(SPANDATA.CODE_NAMESPACE, namespace)
 
-        try:
-            filepath = frame.f_code.co_filename
-        except Exception:
-            filepath = None
+        filepath = _get_frame_module_abs_path(frame)
         if filepath is not None:
             if namespace is not None:
                 in_app_path = filename_for_module(namespace, filepath)
